@@ -7,170 +7,220 @@
 // 6. give the user their winning 
 // 7. play again 
 
-const ROWS = 3;
-const COLS = 3; 
-const SYMBOLS_COUNT = { '🍒': 6, '🍋': 8, '🍊': 10, '🍇': 12 };
-const SYMBOL_VALUES = { '🍒': 5, '🍋': 4, '🍊': 3, '🍇': 2 };
- let gameBalance = 0;
- 
-
-
-
-function showMessage(text, color) {
-    const messageBox = document.getElementById('message');
-    messageBox.textContent = text; 
-    messageBox.style.color = color; 
-}
- 
-function displayInitialReelsFixed() {
-  const initialReels = [
-    ['🍋', '🍒', '🍊'],  // Reel 1
-    ['🍊', '🍋', '🍒'],  // Reel 2
-    ['🍇', '🍊', '🍋']   // Reel 3
-  ];
-
-  for (let i = 0; i < COLS; i++) {
-    document.getElementById(`reel${i+1}`).textContent = initialReels[i].join('\n');
-  }
-};
- 
-window.addEventListener('DOMContentLoaded', displayInitialReelsFixed);
-
-
-
-function depositGame() {
-const depositInput = document.getElementById('cash'); 
-const depositAmount = parseFloat(depositInput.value); 
-
-if(isNaN(depositAmount) || depositAmount <= 0) {
-  showMessage('Please Enter an valid Deposit Amount', 'red'); 
-  return;
-}
-
-gameBalance += depositAmount; 
-
-const balanceDisplay = document.getElementById('balance-display'); 
-balanceDisplay.textContent = ` balance ${gameBalance} `; 
-
-showMessage(`Deposit of $${depositAmount} successful!`, 'green');
-
-depositInput.value = '';
-}; 
-document.getElementById('deposit-btn').addEventListener('click', depositGame);
-
-
-function spin() {
-    const symbols = [];
-    for (const [symbol, count] of Object.entries(SYMBOLS_COUNT)) {
-        for (let i = 0; i < count; i++) {
-            symbols.push(symbol);
-        }
-    }
-
-    const reels = [];
-    for (let i = 0; i < COLS; i++) {
-        reels.push([]);
-        const reelSymbols = [...symbols];
-        for (let j = 0; j < ROWS; j++) {
-            const randomIndex = Math.floor(Math.random() * reelSymbols.length);
-            const selectedSymbol = reelSymbols[randomIndex];
-            reels[i].push(selectedSymbol);
-            reelSymbols.splice(randomIndex, 1);
-        }
-    }
-    return reels;
-}
 
 
 
 
-function betAmount() {
-  const betInput = document.getElementById('bet');
-  const linesInput = document.getElementById('lines');
-
-  const betAmountFor = parseFloat(betInput.value);
-  const numberLinesFor = parseFloat(linesInput.value);
-
-
-  if (isNaN(betAmountFor) || betAmountFor <= 0) {
-    showMessage('Please enter a valid bet amount', 'red');
-    return;
-  }
-
-  if (isNaN(numberLinesFor) || numberLinesFor < 1 || numberLinesFor > 3) {
-    showMessage('Please enter a valid number of lines', 'red');
-    return;
-  }
-
-  const totalBet = betAmountFor * numberLinesFor;
-
-  if (totalBet > gameBalance) {
-    showMessage('Not enough balance to place this bet!', 'red');
-    return;
-  }
-
-  gameBalance -= totalBet;
-  currentBet = betAmountFor;
-  currentLines = numberLinesFor;
-  document.getElementById('balance-display').textContent = `Balance: $${gameBalance}`;
-  showMessage(`Bet of $${betAmountFor} placed on ${numberLinesFor} lines!`, 'green');
-
-  betInput.value = '';
-};
-
-
-
- function spinReels() {
-  const betInput = document.getElementById('bet');
-  const linesInput = document.getElementById('lines');
-
-  const betAmount = parseFloat(betInput.value);
-  const numberLines = parseFloat(linesInput.value);
-
-  if (isNaN(betAmount) || betAmount <= 0) {
-    showMessage('Please enter a valid bet amount!', 'red');
-    return;
-  }
-  if (isNaN(numberLines) || numberLines < 1 || numberLines > 3) {
-    showMessage('Please enter a valid number of lines!', 'red');
-    return;
-  }
-
-  const totalBet = betAmount * numberLines;
-  if (totalBet > gameBalance) {
-    showMessage('Not enough balance for this bet!', 'red');
-    return;
-  }
-
-  gameBalance -= totalBet;
-  document.getElementById('balance-display').textContent = `Balance: $${gameBalance}`;
-
-  
-  const reels = spin();
-  for (let i = 0; i < COLS; i++) {
-    document.getElementById(`reel${i + 1}`).textContent = reels[i].join('\n');
-  }
-
-   
-  let winnings = 0;
-  for (let line = 0; line < numberLines; line++) {
-    if (reels[0][line] === reels[1][line] && reels[1][line] === reels[2][line]) {
-      const symbol = reels[0][line];
-      winnings += betAmount * SYMBOL_VALUES[symbol];
-    }
-  }
-
- 
-  if (winnings > 0) {
-    gameBalance += winnings;
-    showMessage(`You won $${winnings}! 🎉`, 'green');
+/* ---------- background music (optional) ---------- */
+const backgroundMusic = new Audio('background.mp3'); // if you have a file
+backgroundMusic.loop = true;
+backgroundMusic.volume = 0.25;
+let musicAllowed = false;
+document.getElementById('music').addEventListener('click', () => {
+  if (backgroundMusic.paused) {
+    backgroundMusic.play().catch(e => console.log('play failed', e));
+    musicAllowed = true;
   } else {
-    showMessage('No win this time. Try again!', 'red');
+    backgroundMusic.pause();
+    musicAllowed = false;
   }
+});
 
-  document.getElementById('balance-display').textContent = `Balance: $${gameBalance}`;
-  betInput.value = '';
-  linesInput.value = '';
+const winSound = new Audio('win-music.mp3');  
+winSound.volume = 0.6;
+
+const loseSound = new Audio('lose-music.mp3');  
+loseSound.volume = 0.6;
+
+
+/* ---------- game variables ---------- */
+
+ const ROWS = 3;
+const COLS = 3;
+const SYMBOLS_COUNT = { '🍒': 3, '🍋': 6, '🍊': 10, '🍇': 18 };
+const SYMBOL_VALUES = { '🍒': 10, '🍋': 5, '🍊': 3, '🍇': 2 };
+let gameBalance = 0;
+
+ 
+function showMessage(text, color = 'black') {
+  const messageBox = document.getElementById('message');
+  messageBox.textContent = text;
+  messageBox.style.color = color;
+  if (color === 'green') winSound.play();
+  if (color === 'red')  loseSound.play();
+}
+/* ---------- prepare symbol pool ---------- */
+function buildSymbolsArray() {
+  const symbols = [];
+  for (const [symbol, count] of Object.entries(SYMBOLS_COUNT)) {
+    for (let i = 0; i < count; i++) symbols.push(symbol);
+  }
+  return symbols;
 }
 
-document.getElementById('spin-btn').addEventListener('click', spinReels);
+/* ---------- spin logic: produce final reels result ---------- */
+function spin() {
+  const symbols = buildSymbolsArray();
+  const reels = [];
+  for (let i = 0; i < COLS; i++) {
+    reels.push([]);
+    const reelSymbols = [...symbols];
+    for (let r = 0; r < ROWS; r++) {
+      const idx = Math.floor(Math.random() * reelSymbols.length);
+      reels[i].push(reelSymbols[idx]);
+      reelSymbols.splice(idx, 1);
+    }
+  }
+  console.log('final reels result:', reels);
+  return reels;
+}
+
+/* ---------- render reels (given result array) ---------- */
+function renderReels(reels) {
+  for (let i = 0; i < COLS; i++) {
+    const reelEl = document.getElementById(`reel${i+1}`);
+    reelEl.innerHTML = '';
+    reels[i].forEach(symbol => {
+      const span = document.createElement('span');
+      span.textContent = symbol;
+      reelEl.appendChild(span);
+    });
+  }
+}
+
+/* ---------- initial display: fill with random symbols ---------- */
+function displayInitial() {
+  const pool = buildSymbolsArray();
+  const initial = [];
+  for (let i = 0; i < COLS; i++) {
+    initial.push([]);
+    for (let r = 0; r < ROWS; r++) {
+      initial[i].push(pool[Math.floor(Math.random() * pool.length)]);
+    }
+  }
+  renderReels(initial);
+}
+window.addEventListener('DOMContentLoaded', displayInitial);
+
+/* ---------- deposit ---------- */
+document.getElementById('deposit-btn').addEventListener('click', () => {
+  const depositInput = document.getElementById('cash');
+  const amt = parseFloat(depositInput.value);
+  if (isNaN(amt) || amt <= 0) { showMessage('Please enter a valid deposit', 'red'); return; }
+  gameBalance += amt;
+  document.getElementById('balance-display').textContent = `Balance: $${gameBalance}`;
+  showMessage(`Deposit $${amt} successful`, 'green');
+  depositInput.value = '';
+});
+
+ 
+
+/* ---------- spin button / animation / win detection ---------- */
+document.getElementById('spin-btn').addEventListener('click', spinReelsAnimated);
+
+function clearWinsVisuals() {
+  for (let c = 1; c <= COLS; c++) {
+    const reelEl = document.getElementById(`reel${c}`);
+    Array.from(reelEl.children).forEach(ch => ch.classList.remove('win'));
+  }
+}
+
+function spinReelsAnimated() {
+  const betInput = document.getElementById('bet');
+  const linesInput = document.getElementById('lines');
+  const betAmount = parseFloat(betInput.value);
+  const numberLines = parseInt(linesInput.value, 10);
+
+  if (isNaN(betAmount) || betAmount <= 0) { showMessage('Enter valid bet', 'red'); return; }
+  if (isNaN(numberLines) || numberLines < 1 || numberLines > 3) { showMessage('Enter valid lines (1-3)', 'red'); return; }
+  const total = betAmount * numberLines;
+  if (total > gameBalance) { showMessage('Not enough balance', 'red'); return; }
+
+  // deduct bet
+  gameBalance -= total;
+  document.getElementById('balance-display').textContent = `Balance: $${gameBalance}`;
+  showMessage('Spinning...', 'black');
+
+  // clear previous wins visuals
+  clearWinsVisuals();
+
+  // add spin class to reels for visual motion
+  const reelEls = document.querySelectorAll('.reel');
+  reelEls.forEach(r => r.classList.add('spin-animation'));
+
+  // show quick random flicker during spin (optional)
+  const flickerInterval = setInterval(() => {
+    const pool = buildSymbolsArray();
+    for (let i = 0; i < COLS; i++) {
+      const reelEl = document.getElementById(`reel${i+1}`);
+      // temporarily fill with random choices
+      reelEl.innerHTML = '';
+      for (let r = 0; r < ROWS; r++) {
+        const s = pool[Math.floor(Math.random()*pool.length)];
+        const span = document.createElement('span');
+        span.textContent = s;
+        reelEl.appendChild(span);
+      }
+    }
+  }, 80);
+
+  // after spinDuration, stop and show final result
+  const spinDuration = 2000; // ms
+  setTimeout(() => {
+    clearInterval(flickerInterval);
+    reelEls.forEach(r => r.classList.remove('spin-animation'));
+
+    const reels = spin(); // final result
+    renderReels(reels);
+
+     
+     // Check horizontal wins (rows)
+      let winnings = 0;
+  const winningSymbols = [];
+  for (let row = 0; row < numberLines; row++) {
+    if (reels[0][row] === reels[1][row] && reels[1][row] === reels[2][row]) {
+      const sym = reels[0][row];
+      winnings += betAmount * SYMBOL_VALUES[sym];
+      for (let c = 0; c < COLS; c++) {
+        const node = document.getElementById(`reel${c+1}`).children[row];
+        if (node) {
+          node.classList.add('win');
+          winningSymbols.push(node);
+        }
+      }
+    }
+  }
+
+  // 🎯 Check vertical wins (columns)
+  for (let col = 0; col < COLS; col++) {
+    if (reels[col][0] === reels[col][1] && reels[col][1] === reels[col][2]) {
+      const sym = reels[col][0];
+      winnings += betAmount * SYMBOL_VALUES[sym];
+      for (let r = 0; r < ROWS; r++) {
+        const node = document.getElementById(`reel${col+1}`).children[r];
+        if (node) {
+          node.classList.add('win');
+          winningSymbols.push(node);
+        }
+      }
+    }
+  }
+
+    if (winnings > 0) {
+      gameBalance += winnings;
+      showMessage(`🎉 You won $${winnings}`, 'green');
+      winSound.currentTime = 0;
+winSound.play();
+    } else {
+      showMessage('No win this time. Try again!', 'red');
+    }
+    document.getElementById('balance-display').textContent = `Balance: $${gameBalance}`;
+ 
+  }, spinDuration);
+}
+
+/* Debug helper: show console message if errors occur */
+window.onerror = function(msg, src, line, col, err) {
+  console.error('Error captured:', msg, 'at', src, line, col, err);
+  showMessage('An error occurred — check console (F12)', 'red');
+};

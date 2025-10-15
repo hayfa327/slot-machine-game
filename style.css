@@ -46,6 +46,64 @@ h1 {
 }
 
 
+.reel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.reel span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;           /* bigger symbols */
+  width: 80px;
+  height: 70px;
+  border-radius: 50%;        /* make it round */
+  background: radial-gradient(circle at 30% 30%, #ffe57f, #ffb300);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.reel span:hover {
+  transform: scale(0.5);
+  box-shadow: 0 6px 14px rgba(255, 215, 0, 0.5);
+}
+
+
+.spin-animation {
+  animation: spin 0.2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-20px); }
+}
+
+
+.win {
+  animation: glowWin 1s ease-in-out infinite alternate;
+  background: radial-gradient(circle at 30% 30%, #fff176, #fdd835);
+  box-shadow: 0 0 20px 6px rgba(255, 223, 0, 0.9);
+  transform: scale(1.3);
+}
+
+@keyframes glowWin {
+  0% {
+    box-shadow: 0 0 10px rgba(255, 223, 0, 0.7), 0 0 20px rgba(255, 223, 0, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 25px rgba(255, 215, 0, 1), 0 0 40px rgba(255, 255, 100, 0.9);
+  }
+}
+
+
+
+
+
+
 #balance-display {
     font-size: 15px;
     font-family: "Press Start 2P", system-ui;
@@ -252,4 +310,29 @@ h1 .span2 {
     flex-direction: column;
     align-items: center;
     gap: 5px;
+    }
+
+    #music {
+        font-size: 20px;  
+        font-family: "Press Start 2P", system-ui;
+        width: 130px;
+        height: 50px;
+        color: white;
+        border-radius: 15px;
+        border: 4px solid rgb(0, 255, 234);
+        padding: 10px;
+        background: radial-gradient(circle at center, #00fff7 0%, #00c8ff 100%);
+        box-shadow: 0 0 40px rgb(0, 255, 234),
+                    inset 0 0 15px rgba(255, 255, 255, 0.5);
+        transition: all 0.2s ease;
+        margin-left: 20px;  
+        align-items: center;
+        justify-content: center;
+    }
+
+    #music:hover {
+        background: radial-gradient(circle at center, #80ffff 0%, #00e2ff 100%);
+        cursor: pointer;
+        box-shadow: 0 0 30px rgb(0, 255, 234), 
+                    0 0 60px rgba(0, 255, 234, 0.5);
     }
