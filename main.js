@@ -10,21 +10,34 @@
 
 
 
-
-/* ---------- background music (optional) ---------- */
-const backgroundMusic = new Audio('background.mp3'); // if you have a file
-backgroundMusic.loop = true;
-backgroundMusic.volume = 0.25;
-let musicAllowed = false;
-document.getElementById('music').addEventListener('click', () => {
-  if (backgroundMusic.paused) {
-    backgroundMusic.play().catch(e => console.log('play failed', e));
-    musicAllowed = true;
-  } else {
-    backgroundMusic.pause();
-    musicAllowed = false;
-  }
+/* ---------- background music ---------- */
+const backgroundMusic = new Audio('background.mp3');  
+backgroundMusic.loop = true;       
+backgroundMusic.volume = 0.25;      
+ 
+window.addEventListener('load', () => {
+  backgroundMusic.play().catch(err => {
+    console.log('Autoplay blocked, waiting for user interaction:', err);
+  });
 });
+
+ 
+const musicBtn = document.getElementById('music');
+let isPlaying = true;  
+
+musicBtn.textContent = "🔊";  
+
+musicBtn.addEventListener('click', () => {
+  if (isPlaying) {
+    backgroundMusic.pause();
+    musicBtn.textContent = "🔇";
+  } else {
+    backgroundMusic.play();
+    musicBtn.textContent = "🔊";
+  }
+  isPlaying = !isPlaying;
+});
+ 
 
 const winSound = new Audio('win-music.mp3');  
 winSound.volume = 0.6;
@@ -191,7 +204,7 @@ function spinReelsAnimated() {
     }
   }
 
-  // 🎯 Check vertical wins (columns)
+  //  Check vertical wins (columns)
   for (let col = 0; col < COLS; col++) {
     if (reels[col][0] === reels[col][1] && reels[col][1] === reels[col][2]) {
       const sym = reels[col][0];
@@ -218,6 +231,24 @@ winSound.play();
  
   }, spinDuration);
 }
+
+
+
+const instructionsBtn = document.getElementById('instructions-btn');
+const instructionsBox = document.getElementById('instructions-box');
+const closeInstructions = document.getElementById('close-instructions');
+
+instructionsBtn.addEventListener('click', () => {
+  instructionsBox.style.display = 'block';
+});
+
+closeInstructions.addEventListener('click', () => {
+  instructionsBox.style.display = 'none';
+});
+
+
+
+
 
 /* Debug helper: show console message if errors occur */
 window.onerror = function(msg, src, line, col, err) {
