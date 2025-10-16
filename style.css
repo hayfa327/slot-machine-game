@@ -282,7 +282,7 @@ h1 .span2 {
               0 0 6rem rgba(0, 255, 234, 0.5);
 }
 
-/* الصندوق الذي يظهر */
+ 
 #instructions-box {
   position: fixed;
   top: 50%;
@@ -296,7 +296,7 @@ h1 .span2 {
   width: 400px;
   text-align: center;
   box-shadow: 0 0 40px #00fff7;
-  display: none; /* مخفي بالبداية */
+  display: none;  
   z-index: 999;
 }
 

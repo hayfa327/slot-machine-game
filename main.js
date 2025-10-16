@@ -10,33 +10,43 @@
 
 
 
-/* ---------- background music ---------- */
+ 
 const backgroundMusic = new Audio('background.mp3');  
 backgroundMusic.loop = true;       
 backgroundMusic.volume = 0.25;      
+
+let isPlaying = false;  
+
  
-window.addEventListener('load', () => {
-  backgroundMusic.play().catch(err => {
-    console.log('Autoplay blocked, waiting for user interaction:', err);
-  });
-});
+function startMusicOnce() {
+  if (!isPlaying) {
+    backgroundMusic.play().catch(err => console.log('Error playing music:', err));
+    isPlaying = true;
+    musicBtn.textContent = "🔊";
+  }
+ 
+  window.removeEventListener('click', startMusicOnce);
+}
 
  
 const musicBtn = document.getElementById('music');
-let isPlaying = true;  
+musicBtn.textContent = "🔇";
 
-musicBtn.textContent = "🔊";  
+ 
+window.addEventListener('click', startMusicOnce);
 
+ 
 musicBtn.addEventListener('click', () => {
   if (isPlaying) {
     backgroundMusic.pause();
     musicBtn.textContent = "🔇";
   } else {
-    backgroundMusic.play();
+    backgroundMusic.play().catch(err => console.log('Error playing music:', err));
     musicBtn.textContent = "🔊";
   }
   isPlaying = !isPlaying;
 });
+;
  
 
 const winSound = new Audio('win-music.mp3');  
