@@ -1,4 +1,4 @@
-# 🎰 Slot Machine Game
+#  Slot Machine Game
 
 ##  Live Demo
 https://hayfa327.github.io/slot-machine-game/
